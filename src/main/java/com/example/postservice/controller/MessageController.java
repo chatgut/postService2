@@ -37,7 +37,7 @@ public class MessageController {
         List<Message> fromandto = repository.findByFromUsernameEqualsIgnoreCaseAndToUsernameEqualsIgnoreCase(
                 fromUsername, toUsername, paging).getContent();
         return fromandto;
-
+        // redundant comment
     }
 
 }
