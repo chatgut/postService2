@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/")
 public class MessageController {
 
     private final MessageRepository repository;
@@ -19,14 +19,14 @@ public class MessageController {
         this.repository = repository;
     }
 
-    @PostMapping("/createmessage")
+    @PostMapping("/posts")
     public Message createMessage(@RequestBody Message message) {
         message.setDateAndTime(LocalDateTime.now().toString());
         return repository.save(message);
     }
 
 
-    @GetMapping("/getmessages")
+    @GetMapping("/posts")
     public List<Message> getMessages(@RequestParam String fromUsername,
                                      @RequestParam String toUsername,
                                      @RequestParam(defaultValue = "0") int page,
