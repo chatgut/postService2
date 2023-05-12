@@ -1,6 +1,10 @@
+<h1>Spring Boot Application - post service</h1>
+Application for posting and reading messages<BR>
+
 Application is running on port 8000<BR>
 Together with a mongodb instance<BR>
 <BR>
+<h1>Getting started</h1>
 To run in docker containers  via a network called mynetwork:<BR>
 docker network create mynetwork<BR>
 docker run -p 27017:27017 --name mymongo --network-alias mymongo --network mynetwork -d mongo:latest<BR>
@@ -11,7 +15,9 @@ https://hub.docker.com/r/jonathanjonathan001/postservice <BR>
 docker pull jonathanjonathan001/postservice:latest
 <BR>
 <BR>
-URL is /posts for POST and GET<BR>
+<h1>Endpoints</h1>
+
+<h2>Endpoint: POST /posts</h2>
 JSON format for POST:<BR>
 {<BR>
 "fromUsername": "kalle",<BR>
@@ -19,11 +25,13 @@ JSON format for POST:<BR>
 "message": "This is a message"<BR>
 }<BR>
 <BR>
+<h2>Endpoint: GET /posts</h2>
 To do a GET request the format on the URL should be:<BR>
 http://hostname:8000/posts?toUsername=touser&page=0&nMessages=numberofmessages <BR>
-hostname should be postservice (I guess?)<BR>
-touser should be the username of the recipient<BR>
-numberofmessages should be the desired number of messages to get<BR>
+<b>And there should be a sender in the http header named userID</b><BR>
+<b>hostname</b> should be postservice<BR>
+<b>touser</b> should be the username of the recipient<BR>
+<b>numberofmessages</b> should be the desired number of messages to get<BR>
 <BR>
 This is the format of the JSON that comes back from the request:<BR>
 {<BR>
