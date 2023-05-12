@@ -20,9 +20,8 @@ JSON format for POST:<BR>
 }<BR>
 <BR>
 To do a GET request the format on the URL should be:<BR>
-http://hostname:8000/posts?fromUsername=fromuser&toUsername=touser&page=0&nMessages=numberofmessages <BR>
+http://hostname:8000/posts?toUsername=touser&page=0&nMessages=numberofmessages <BR>
 hostname should be postservice (I guess?)<BR>
-fromuser should be the username of the sender<BR>
 touser should be the username of the recipient<BR>
 numberofmessages should be the desired number of messages to get<BR>
 <BR>
