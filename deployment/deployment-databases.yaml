@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: postgresql
+  name: postgresql
+spec:
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+      nodePort: 32001
+  selector:
+    app: postgresql
+  type: NodePort
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: StatefulSet # Kubernetes resource kind we are creating
+metadata:
+  name: postgresql
+  namespace: default
+  labels:
+    app: postgresql
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+  replicas: 1 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      serviceAccountName: default # configmap-reader-account
+      containers:
+        - resources:
+            requests:
+              memory: "200Mi"
+              cpu: "200m"
+            limits:
+              memory: "400Mi"
+          name: postgresql
+          image: postgres # Image that will be used to containers in the cluster
+          env:
+            - name: POSTGRES_PASSWORD
+              value: password
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+          #          livenessProbe:
+          #            failureThreshold: 3
+          #            httpGet:
+          #              path: /livez
+          #              port: 8080
+          #            periodSeconds: 10
+          #          readinessProbe:
+          #            failureThreshold: 3
+          #            httpGet:
+          #              path: /readyz
+          #              port: 8080
+          #            initialDelaySeconds: 10
+          #            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432 # The port that the container is running on in the cluster
+#---
+##apiVersion: v1
+##kind: Service
+##metadata:
+##  name: mymongo
+##  namespace: default
+##spec:
+##  selector:
+##    app.kubernetes.io/name: mymongo
+##  ports:
+##    - protocol: TCP
+##      port: 27017
+##      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mymongo
+spec:
+  serviceName: mymongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+        selector: mymongo
+    spec:
+      containers:
+        - name: mymongo
+          image: mongo:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mymongo
+  name: mymongo
+spec:
+  ports:
+    - port: 27017
+      protocol: TCP
+      targetPort: 27017
+      nodePort: 32000
+  selector:
+    app: mymongo
+  type: NodePort
+status:
+  loadBalancer: {}

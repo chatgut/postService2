@@ -1,0 +1,16 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: httpbin
+  namespace: default
+spec:
+#  selector:
+#    matchLabels:
+#      app: gateway
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            requestPrincipals: [ "*" ]
+        - source:
+            namespaces: [ "default" ]

@@ -1,0 +1,65 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: jwt-gateway
+  namespace: default
+  labels:
+    app: gateway
+spec:
+  gatewayClassName: istio
+  listeners:
+    - name: http
+      port: 90
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+#---
+#apiVersion: security.istio.io/v1
+#kind: RequestAuthentication
+#metadata:
+#  name: req-authn-for-all
+#  namespace: istio-system
+#spec:
+#  selector:
+#    matchLabels:
+#      app: gateway
+#  jwtRules:
+#    - issuer: "https://fungover.org/auth"
+#      jwksUri: https://fungover.org/auth/.well-known/jwks.json
+#      outputClaimToHeaders:
+#        - header: "x-jwt-claim-sub"
+#          claim: "sub"
+#        - header: "x-jwt-scope"
+#          claim: "scope"
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: bookinfo
+  namespace: default
+spec:
+  parentRefs:
+    - name: jwt-gateway
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /
+      backendRefs:
+        - name: postservice
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /postservice
+      backendRefs:
+        - name: postservice
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /authservice
+      backendRefs:
+        - name: authservice
+          port: 8001

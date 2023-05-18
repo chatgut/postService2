@@ -8,7 +8,7 @@ Together with a mongodb instance<BR>
 To run in docker containers  via a network called mynetwork:<BR>
 docker network create mynetwork<BR>
 docker run -p 27017:27017 --name mymongo --network-alias mymongo --network mynetwork -d mongo:latest<BR>
-docker run -d --name postservice --network-alias postservice --network mynetwork -p 8000:8000 postservice:latest<BR>
+docker run -d --name postservice --network-alias postservice --network mynetwork -p 8000:8000 jonathanjonathan001/postservice:latest<BR>
 <BR>
 Docker image is available on <BR>
 https://hub.docker.com/r/jonathanjonathan001/postservice <BR>
@@ -28,7 +28,7 @@ JSON format for POST:<BR>
 <h2>Endpoint: GET /posts</h2>
 To do a GET request the format on the URL should be:<BR>
 http://hostname:8000/posts?toUsername=touser&page=0&nMessages=numberofmessages <BR>
-<b>And there should be a sender in the http header named userID</b><BR>
+<b>And there should be a sender in the http header named userID</b><BR
 <b>hostname</b> should be postservice<BR>
 <b>touser</b> should be the username of the recipient<BR>
 <b>numberofmessages</b> should be the desired number of messages to get<BR>

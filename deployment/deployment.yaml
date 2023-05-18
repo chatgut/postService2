@@ -1,0 +1,133 @@
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: postservice
+  namespace: default
+  labels:
+    app: postservice
+    service: postservice
+spec:
+  selector:
+    app: postservice
+  ports:
+    - name: http
+      port: 8000 # The port that the service is running on in the cluster
+      targetPort: 8000 # The port exposed by the service
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: postservice
+  namespace: default
+  labels:
+    app: postservice
+spec:
+  selector:
+    matchLabels:
+      app: postservice
+  replicas: 1 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: postservice
+    spec:
+      serviceAccountName: default # configmap-reader-account
+      containers:
+        - resources:
+            requests:
+              memory: "200Mi"
+              cpu: "200m"
+            limits:
+              memory: "400Mi"
+          name: postservice
+          image: postservice:1.0 # Image that will be used to containers in the cluster
+          env:
+          - name: DB_URL
+            value: mongodb://mymongo:27017/mydbone?retryWrites=true&w=majority&maxIdleTimeMS=5000
+#          livenessProbe:
+#            failureThreshold: 3
+#            httpGet:
+#              path: /livez
+#              port: 8080
+#            periodSeconds: 10
+#          readinessProbe:
+#            failureThreshold: 3
+#            httpGet:
+#              path: /readyz
+#              port: 8080
+#            initialDelaySeconds: 10
+#            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000 # The port that the container is running on in the cluster
+---
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: authservice
+  namespace: default
+  labels:
+    app: authservice
+    service: authservice
+spec:
+  selector:
+    app: authservice
+  ports:
+    - name: http
+      port: 8001 # The port that the service is running on in the cluster
+      targetPort: 8001 # The port exposed by the service
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: authservice
+  namespace: default
+  labels:
+    app: authservice
+spec:
+  selector:
+    matchLabels:
+      app: authservice
+  replicas: 1 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      serviceAccountName: default # configmap-reader-account
+      containers:
+        - resources:
+            requests:
+              memory: "200Mi"
+              cpu: "200m"
+            limits:
+              memory: "400Mi"
+          name: authservice
+          image: authservice:latest # Image that will be used to containers in the cluster
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgresql:5432/postgres
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+          #          livenessProbe:
+          #            failureThreshold: 3
+          #            httpGet:
+          #              path: /livez
+          #              port: 8080
+          #            periodSeconds: 10
+          #          readinessProbe:
+          #            failureThreshold: 3
+          #            httpGet:
+          #              path: /readyz
+          #              port: 8080
+          #            initialDelaySeconds: 10
+          #            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001 # The port that the container is running on in the cluster
