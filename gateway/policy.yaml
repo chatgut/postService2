@@ -8,9 +8,9 @@ spec:
 #    matchLabels:
 #      app: gateway
   action: ALLOW
-  rules:
-    - from:
-        - source:
-            requestPrincipals: [ "*" ]
-        - source:
-            namespaces: [ "default" ]
+#  rules:
+#    - from:
+#        - source:
+#            requestPrincipals: [ "*" ]
+#        - source:
+#            namespaces: [ "default" ]

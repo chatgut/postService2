@@ -1,19 +1,65 @@
-apiVersion: gateway.networking.k8s.io/v1beta1
+apiVersion: "security.istio.io/v1beta1"
+kind: "PeerAuthentication"
+metadata:
+  name: "mypeerauthentication"
+  namespace: "default"
+spec:
+  mtls:
+    mode: DISABLE
+---
+## NEW VERSION GATEWAY ##
+apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
   name: jwt-gateway
   namespace: default
-  labels:
-    app: gateway
 spec:
-  gatewayClassName: istio
-  listeners:
-    - name: http
-      port: 90
-      protocol: HTTP
-      allowedRoutes:
-        namespaces:
-          from: Same
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+### Third version gateway ###
+#---
+#apiVersion: gateway.networking.k8s.io/v1beta1
+#kind: Gateway
+#metadata:
+#  name: jwt-gateway
+#  namespace: default
+#spec:
+#  gatewayClassName: istio
+#  listeners:
+#    - name: default
+#      # hostname: "localhost"
+#      port: 90
+#      protocol: HTTP
+#      allowedRoutes:
+#        namespaces:
+#          from: All
+
+
+#### OLD VERSION GATEWAY ####
+#apiVersion: gateway.networking.k8s.io/v1beta1
+#kind: Gateway
+#metadata:
+#  name: jwt-gateway
+#  namespace: default
+#  labels:
+#    app: gateway
+#spec:
+#  gatewayClassName: istio
+#  listeners:
+#    - name: http
+#      port: 90
+#      protocol: HTTP
+#      allowedRoutes:
+#        namespaces:
+#          from: Same
 #---
 #apiVersion: security.istio.io/v1
 #kind: RequestAuthentication
@@ -33,33 +79,115 @@ spec:
 #        - header: "x-jwt-scope"
 #          claim: "scope"
 ---
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: HTTPRoute
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
 metadata:
-  name: bookinfo
+  name: myvirtualservice
   namespace: default
 spec:
-  parentRefs:
-    - name: jwt-gateway
-  rules:
-    - matches:
-        - path:
-            type: Exact
-            value: /
-      backendRefs:
-        - name: postservice
-          port: 8000
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /postservice
-      backendRefs:
-        - name: postservice
-          port: 8000
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /authservice
-      backendRefs:
-        - name: authservice
-          port: 8001
+  hosts:
+    - "*"
+  gateways:
+    - jwt-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /postservice/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: postservice.default.svc.cluster.local
+            port:
+              number: 8000
+    - match:
+        - uri:
+            prefix: /authservice/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: authservice.default.svc.cluster.local
+            port:
+              number: 8001
+    - match:
+        - uri:
+            exact: /nginx
+      #      rewrite:
+      #        uri: /
+      route:
+        - destination:
+            host: nginx.default.svc.cluster.local
+            port:
+              number: 8003
+#---
+## NEW HTTPROUTE ###
+#apiVersion: gateway.networking.k8s.io/v1beta1
+#kind: HTTPRoute
+#metadata:
+#  name: httproute
+#  namespace: default
+#spec:
+#  parentRefs:
+#    - name: jwt-gateway
+#      namespace: default
+#  # hostnames: ["*"]
+#  rules:
+#    - matches:
+#        - path:
+#            type: PathPrefix
+#            value: /authservice
+#      backendRefs:
+#        - name: authservice
+#          port: 8001
+#    - matches:
+#        - path:
+#            type: PathPrefix
+#            value: /postservice
+#      backendRefs:
+#        - name: postservice
+#          port: 8000
+
+#### Old HTTPRoute ###
+#apiVersion: gateway.networking.k8s.io/v1beta1
+#kind: HTTPRoute
+#metadata:
+#  name: bookinfo
+#  namespace: default
+#spec:
+#  parentRefs:
+#    - name: jwt-gateway
+#  rules:
+#    - matches:
+#        - path:
+#            type: Exact
+#            value: /
+#      backendRefs:
+#        - name: postservice
+#          port: 8000
+#    - matches:
+#        - path:
+#            type: PathPrefix
+#            value: /postservice
+##    - filters:
+##        - type: URLRewrite
+##          urlRewrite:
+##            path:
+##              type: ReplacePrefixMatch
+##              replacePrefixMatch: /
+#      backendRefs:
+#        - name: postservice
+#          port: 8000
+#    - matches:
+#        - path:
+#            type: PathPrefix
+#            value: /authservice
+##    - filters:
+##        - type: URLRewrite
+##          urlRewrite:
+##            path:
+##              type: ReplacePrefixMatch
+##              replacePrefixMatch: /
+#      backendRefs:
+#        - name: authservice
+#          port: 8001

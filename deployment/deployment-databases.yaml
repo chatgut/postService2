@@ -100,20 +100,31 @@ spec:
         - name: mymongo
           image: mongo:latest
 ---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    app: mymongo
+#  name: mymongo
+#spec:
+#  ports:
+#    - port: 27017
+#      protocol: TCP
+#      targetPort: 27017
+#      nodePort: 32000
+#  selector:
+#    app: mymongo
+#  type: NodePort
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: mymongo
   name: mymongo
+  labels:
+    app: database
 spec:
-  ports:
-    - port: 27017
-      protocol: TCP
-      targetPort: 27017
-      nodePort: 32000
+  clusterIP: None
   selector:
-    app: mymongo
-  type: NodePort
-status:
-  loadBalancer: {}
+    app: database
+
+#status:
+#  loadBalancer: {}
